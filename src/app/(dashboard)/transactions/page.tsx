@@ -306,24 +306,6 @@ function firstString(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function formatSummaryValue(totals: Record<AccountCurrency, number>): string {
-  const currencies = ACCOUNT_CURRENCIES.filter(
-    (currency) => totals[currency] !== 0,
-  );
-
-  if (currencies.length === 0) {
-    return "$0.00";
-  }
-
-  if (currencies.length === 1) {
-    const currency = currencies[0];
-
-    return formatCurrency(totals[currency], currency);
-  }
-
-  return `${currencies.length} currencies`;
-}
-
 function formatCurrencyBreakdown(
   totals: Record<AccountCurrency, number>,
 ): string {

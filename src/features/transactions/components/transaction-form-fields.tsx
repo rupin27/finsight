@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RecurrenceFields } from "@/features/transactions/components/recurrence-fields";
 import type { Account } from "@/features/accounts/account.types";
 import type {
   TransactionCategory,
@@ -13,11 +17,6 @@ import {
   TRANSACTION_KIND_LABELS,
 } from "@/features/transactions/transaction.types";
 import type { TransactionFieldErrors } from "@/features/transactions/transaction-validation";
-import { RecurrenceFields } from "@/features/transactions/components/recurrence-fields";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 
 interface TransactionFormFieldsProps {
   accounts: Account[];
@@ -99,37 +98,23 @@ export function TransactionFormFields({
     (account) => !sourceAccount || account.currency === sourceAccount.currency,
   );
 
-  useEffect(() => {
-    const categoryIsAvailable = availableCategories.some(
-      (category) => category.id === categoryId,
-    );
+  const preferredCategory =
+    transactionKind === "loan_payment"
+      ? availableCategories.find((category) => category.name === "Loan Payment")
+      : undefined;
 
-    if (!categoryIsAvailable) {
-      const preferredCategory =
-        transactionKind === "loan_payment"
-          ? availableCategories.find(
-              (category) => category.name === "Loan Payment",
-            )
-          : undefined;
+  const effectiveCategoryId = availableCategories.some(
+    (category) => category.id === categoryId,
+  )
+    ? categoryId
+    : (preferredCategory?.id ?? availableCategories[0]?.id ?? "");
 
-      setCategoryId(preferredCategory?.id ?? availableCategories[0]?.id ?? "");
-    }
-  }, [availableCategories, categoryId, transactionKind]);
-
-  useEffect(() => {
-    if (transactionKind !== "loan_payment") {
-      setDestinationAccountId("");
-      return;
-    }
-
-    const destinationIsAvailable = availableLoans.some(
-      (account) => account.id === destinationAccountId,
-    );
-
-    if (!destinationIsAvailable) {
-      setDestinationAccountId(availableLoans[0]?.id ?? "");
-    }
-  }, [availableLoans, destinationAccountId, transactionKind]);
+  const effectiveDestinationAccountId =
+    transactionKind === "loan_payment"
+      ? availableLoans.some((account) => account.id === destinationAccountId)
+        ? destinationAccountId
+        : (availableLoans[0]?.id ?? "")
+      : "";
 
   return (
     <div className="grid gap-5 sm:grid-cols-2">
@@ -201,7 +186,9 @@ export function TransactionFormFields({
               value={account.id}
               className="bg-[#0b0f17]"
             >
-              {account.name} · {account.currency}
+              {account.name}
+              {" · "}
+              {account.currency}
               {!account.isActive ? " · Inactive" : ""}
             </option>
           ))}
@@ -219,7 +206,7 @@ export function TransactionFormFields({
           <select
             id="destinationAccountId"
             name="destinationAccountId"
-            value={destinationAccountId}
+            value={effectiveDestinationAccountId}
             onChange={(event) => {
               setDestinationAccountId(event.target.value);
             }}
@@ -237,7 +224,9 @@ export function TransactionFormFields({
                   value={account.id}
                   className="bg-[#0b0f17]"
                 >
-                  {account.name} · {account.currency}
+                  {account.name}
+                  {" · "}
+                  {account.currency}
                 </option>
               ))
             )}
@@ -282,7 +271,7 @@ export function TransactionFormFields({
         <select
           id="categoryId"
           name="categoryId"
-          value={categoryId}
+          value={effectiveCategoryId}
           onChange={(event) => {
             setCategoryId(event.target.value);
           }}

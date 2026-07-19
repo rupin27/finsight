@@ -435,24 +435,6 @@ function calculateCurrencyTotals(accounts: Account[]): CurrencyTotals {
   return totals;
 }
 
-function formatSummaryValue(totals: CurrencyTotals): string {
-  const currencies = ACCOUNT_CURRENCIES.filter(
-    (currency) => totals[currency] !== 0,
-  );
-
-  if (currencies.length === 0) {
-    return "$0.00";
-  }
-
-  if (currencies.length === 1) {
-    const currency = currencies[0];
-
-    return formatCurrency(totals[currency], currency);
-  }
-
-  return `${currencies.length} currencies`;
-}
-
 function formatCurrencyBreakdown(totals: CurrencyTotals): string {
   const currencies = ACCOUNT_CURRENCIES.filter(
     (currency) => totals[currency] !== 0,
@@ -465,14 +447,6 @@ function formatCurrencyBreakdown(totals: CurrencyTotals): string {
   return currencies
     .map((currency) => formatCurrency(totals[currency], currency))
     .join(" · ");
-}
-
-function formatAccountCount(count: number): string {
-  return `${count} ${count === 1 ? "account" : "accounts"}`;
-}
-
-function formatLoanCount(count: number): string {
-  return `${count} ${count === 1 ? "loan" : "loans"}`;
 }
 
 function formatFxDate(value: string): string {

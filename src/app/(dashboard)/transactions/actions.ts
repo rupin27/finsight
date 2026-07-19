@@ -105,11 +105,11 @@ async function getOwnedAccount(
     .from("accounts")
     .select(
       `
-        id,
-        account_type,
-        currency,
-        is_active
-      `,
+          id,
+          account_type,
+          currency,
+          is_active
+        `,
     )
     .eq("id", accountId)
     .eq("user_id", userId)
@@ -121,8 +121,11 @@ async function getOwnedAccount(
 
   return {
     id: String(data.id),
+
     accountType: String(data.account_type),
+
     currency: data.currency as AccountCurrency,
+
     isActive: Boolean(data.is_active),
   };
 }
@@ -235,6 +238,7 @@ export async function createTransaction(
   if (!parsed.success) {
     return {
       status: "error",
+
       message: "Please correct the highlighted transaction details.",
 
       fieldErrors: parsed.error.flatten().fieldErrors as TransactionFieldErrors,
@@ -253,6 +257,7 @@ export async function createTransaction(
   if (references.error || !references.currency) {
     return {
       status: "error",
+
       message: references.error ?? "The transaction references are invalid.",
     };
   }
@@ -269,6 +274,7 @@ export async function createTransaction(
     transaction_kind: parsed.data.transactionKind,
 
     amount: parsed.data.amount,
+
     currency: references.currency,
 
     transaction_date: parsed.data.transactionDate,
@@ -297,6 +303,7 @@ export async function createTransaction(
   if (error) {
     return {
       status: "error",
+
       message: mapDatabaseError(error, "The transaction could not be created."),
     };
   }
@@ -305,6 +312,7 @@ export async function createTransaction(
 
   return {
     status: "success",
+
     message: "Transaction created successfully.",
   };
 }
@@ -319,6 +327,7 @@ export async function updateTransaction(
   if (!parsedId.success) {
     return {
       status: "error",
+
       message: "The transaction identifier is invalid.",
     };
   }
@@ -328,6 +337,7 @@ export async function updateTransaction(
   if (!parsed.success) {
     return {
       status: "error",
+
       message: "Please correct the highlighted transaction details.",
 
       fieldErrors: parsed.error.flatten().fieldErrors as TransactionFieldErrors,
@@ -346,6 +356,7 @@ export async function updateTransaction(
   if (references.error || !references.currency) {
     return {
       status: "error",
+
       message: references.error ?? "The transaction references are invalid.",
     };
   }
@@ -362,6 +373,7 @@ export async function updateTransaction(
       transaction_kind: parsed.data.transactionKind,
 
       amount: parsed.data.amount,
+
       currency: references.currency,
 
       transaction_date: parsed.data.transactionDate,
@@ -394,6 +406,7 @@ export async function updateTransaction(
   if (error) {
     return {
       status: "error",
+
       message: mapDatabaseError(error, "The transaction could not be updated."),
     };
   }
@@ -401,6 +414,7 @@ export async function updateTransaction(
   if (!data) {
     return {
       status: "error",
+
       message: "The transaction was not found or you do not have access to it.",
     };
   }
@@ -409,6 +423,7 @@ export async function updateTransaction(
 
   return {
     status: "success",
+
     message: "Transaction updated successfully.",
   };
 }
@@ -417,6 +432,8 @@ export async function deleteTransaction(
   transactionId: string,
   _formData?: FormData,
 ): Promise<void> {
+  void _formData;
+
   const parsedId = transactionIdSchema.safeParse(transactionId);
 
   if (!parsedId.success) {

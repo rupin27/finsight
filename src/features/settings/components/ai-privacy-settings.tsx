@@ -47,10 +47,6 @@ export function AiPrivacySettings({ data }: AiPrivacySettingsProps) {
       : 0;
 
   useEffect(() => {
-    setEnabled(data.preferences.aiEnabled);
-  }, [data.preferences.aiEnabled]);
-
-  useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "AI preferences saved.");
 

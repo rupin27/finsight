@@ -41,10 +41,6 @@ export function ProfileSettings({ data }: ProfileSettingsProps) {
   const dirty = fullName !== initialFullName;
 
   useEffect(() => {
-    setFullName(data.preferences.fullName ?? "");
-  }, [data.preferences.fullName]);
-
-  useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Profile settings saved.");
 

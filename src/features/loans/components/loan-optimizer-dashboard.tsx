@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import {
@@ -45,28 +45,23 @@ export function LoanOptimizerDashboard({ data }: LoanOptimizerDashboardProps) {
   );
 
   const [assumptions, setAssumptions] = useState<LoanOptimizerAssumptions>(
-    DEFAULT_LOAN_OPTIMIZER_ASSUMPTIONS,
+    () => ({
+      ...DEFAULT_LOAN_OPTIMIZER_ASSUMPTIONS,
+    }),
   );
-
-  useEffect(() => {
-    if (
-      data.loans.length > 0 &&
-      !data.loans.some((loan) => loan.accountId === selectedLoanId)
-    ) {
-      setSelectedLoanId(data.loans[0].accountId);
-    }
-  }, [data.loans, selectedLoanId]);
-
-  useEffect(() => {
-    setAssumptions(DEFAULT_LOAN_OPTIMIZER_ASSUMPTIONS);
-  }, [selectedLoanId]);
 
   if (data.loans.length === 0) {
     return <EmptyLoanState />;
   }
 
+  const resolvedSelectedLoanId = data.loans.some(
+    (loan) => loan.accountId === selectedLoanId,
+  )
+    ? selectedLoanId
+    : (defaultLoan?.accountId ?? data.loans[0].accountId);
+
   const selectedLoan =
-    data.loans.find((loan) => loan.accountId === selectedLoanId) ??
+    data.loans.find((loan) => loan.accountId === resolvedSelectedLoanId) ??
     data.loans[0];
 
   if (!selectedLoan) {
@@ -74,6 +69,12 @@ export function LoanOptimizerDashboard({ data }: LoanOptimizerDashboardProps) {
   }
 
   const profile = selectedLoan.profile;
+
+  function resetAssumptions() {
+    setAssumptions({
+      ...DEFAULT_LOAN_OPTIMIZER_ASSUMPTIONS,
+    });
+  }
 
   return (
     <div className="space-y-7">
@@ -149,6 +150,8 @@ export function LoanOptimizerDashboard({ data }: LoanOptimizerDashboardProps) {
               value={selectedLoan.accountId}
               onChange={(event) => {
                 setSelectedLoanId(event.target.value);
+
+                resetAssumptions();
               }}
               className="mt-4 flex h-10 w-full min-w-0 rounded-xl border border-input bg-input/20 px-3.5 py-2 text-[0.9375rem] font-medium text-white shadow-sm shadow-black/5 outline-none transition-[border-color,background-color,box-shadow] focus-visible:border-cyan-300/45 focus-visible:ring-2 focus-visible:ring-cyan-300/20 sm:min-w-72"
             >
@@ -192,9 +195,7 @@ export function LoanOptimizerDashboard({ data }: LoanOptimizerDashboardProps) {
           loan={selectedLoan}
           assumptions={assumptions}
           onAssumptionsChange={setAssumptions}
-          onReset={() => {
-            setAssumptions(DEFAULT_LOAN_OPTIMIZER_ASSUMPTIONS);
-          }}
+          onReset={resetAssumptions}
         />
       )}
     </div>
@@ -510,6 +511,7 @@ function AggregateCard({
         aria-hidden="true"
         className={cn(
           "pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100",
+
           styles.glow,
         )}
       />
@@ -530,6 +532,7 @@ function AggregateCard({
           aria-hidden="true"
           className={cn(
             "flex size-10 shrink-0 items-center justify-center rounded-xl border",
+
             styles.icon,
           )}
         >

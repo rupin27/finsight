@@ -1,4 +1,3 @@
-import type { AccountCurrency } from "@/features/accounts/account.types";
 import { getAccounts } from "@/features/accounts/account-data";
 import type {
   LoanDashboardData,

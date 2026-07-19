@@ -72,18 +72,6 @@ export function FinancialPreferences({ data }: FinancialPreferencesProps) {
     dateFormat !== data.preferences.dateFormat;
 
   useEffect(() => {
-    setDefaultCurrency(data.preferences.defaultCurrency);
-
-    setTimezone(data.preferences.timezone);
-
-    setDateFormat(data.preferences.dateFormat);
-  }, [
-    data.preferences.dateFormat,
-    data.preferences.defaultCurrency,
-    data.preferences.timezone,
-  ]);
-
-  useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Financial preferences saved.");
 

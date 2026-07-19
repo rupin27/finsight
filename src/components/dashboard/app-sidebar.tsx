@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -89,10 +89,6 @@ export function AppSidebar({ email }: AppSidebarProps) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
   return (
     <>
       <aside
@@ -170,7 +166,7 @@ function SidebarContent({
           href="/overview"
           onClick={onNavigate}
           aria-label="Go to FinSight overview"
-          className="inline-flex rounded-xl focus-visible:outline-none"
+          className="inline-flex rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/20"
         >
           <FinSightLogo />
         </Link>
@@ -207,6 +203,7 @@ function SidebarContent({
           )}
         >
           <Settings
+            aria-hidden="true"
             className={cn(
               "size-[18px]",
 
@@ -282,6 +279,7 @@ function NavigationLink({
       )}
     >
       <Icon
+        aria-hidden="true"
         className={cn(
           "size-[18px] transition-colors",
 

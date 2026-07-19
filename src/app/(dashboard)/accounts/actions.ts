@@ -16,11 +16,17 @@ const accountIdSchema = z.string().uuid();
 function parseAccountForm(formData: FormData) {
   return accountFormSchema.safeParse({
     name: formData.get("name"),
+
     institution: formData.get("institution"),
+
     accountType: formData.get("accountType"),
+
     country: formData.get("country"),
+
     currency: formData.get("currency"),
+
     openingBalance: formData.get("openingBalance"),
+
     openingBalanceDate: formData.get("openingBalanceDate"),
   });
 }
@@ -61,7 +67,9 @@ export async function createAccount(
   if (!parsed.success) {
     return {
       status: "error",
+
       message: "Please correct the highlighted account details.",
+
       fieldErrors: parsed.error.flatten().fieldErrors as AccountFieldErrors,
     };
   }
@@ -70,20 +78,29 @@ export async function createAccount(
 
   const { error } = await supabase.from("accounts").insert({
     user_id: userId,
+
     name: parsed.data.name,
+
     institution:
       parsed.data.institution.length > 0 ? parsed.data.institution : null,
+
     account_type: parsed.data.accountType,
+
     country: parsed.data.country,
+
     currency: parsed.data.currency,
+
     opening_balance: parsed.data.openingBalance,
+
     opening_balance_date: parsed.data.openingBalanceDate,
+
     is_active: true,
   });
 
   if (error) {
     return {
       status: "error",
+
       message: getDatabaseErrorMessage(
         error,
         "The account could not be created.",
@@ -95,6 +112,7 @@ export async function createAccount(
 
   return {
     status: "success",
+
     message: "Account created successfully.",
   };
 }
@@ -109,6 +127,7 @@ export async function updateAccount(
   if (!parsedId.success) {
     return {
       status: "error",
+
       message: "The account identifier is invalid.",
     };
   }
@@ -118,7 +137,9 @@ export async function updateAccount(
   if (!parsed.success) {
     return {
       status: "error",
+
       message: "Please correct the highlighted account details.",
+
       fieldErrors: parsed.error.flatten().fieldErrors as AccountFieldErrors,
     };
   }
@@ -129,12 +150,18 @@ export async function updateAccount(
     .from("accounts")
     .update({
       name: parsed.data.name,
+
       institution:
         parsed.data.institution.length > 0 ? parsed.data.institution : null,
+
       account_type: parsed.data.accountType,
+
       country: parsed.data.country,
+
       currency: parsed.data.currency,
+
       opening_balance: parsed.data.openingBalance,
+
       opening_balance_date: parsed.data.openingBalanceDate,
     })
     .eq("id", parsedId.data)
@@ -145,6 +172,7 @@ export async function updateAccount(
   if (error) {
     return {
       status: "error",
+
       message: getDatabaseErrorMessage(
         error,
         "The account could not be updated.",
@@ -155,6 +183,7 @@ export async function updateAccount(
   if (!data) {
     return {
       status: "error",
+
       message: "The account was not found or you do not have access to it.",
     };
   }
@@ -163,6 +192,7 @@ export async function updateAccount(
 
   return {
     status: "success",
+
     message: "Account updated successfully.",
   };
 }
@@ -172,6 +202,8 @@ export async function toggleAccountActive(
   isActive: boolean,
   _formData?: FormData,
 ): Promise<void> {
+  void _formData;
+
   const parsedId = accountIdSchema.safeParse(accountId);
 
   if (!parsedId.success) {
@@ -205,6 +237,8 @@ export async function deleteAccount(
   accountId: string,
   _formData?: FormData,
 ): Promise<void> {
+  void _formData;
+
   const parsedId = accountIdSchema.safeParse(accountId);
 
   if (!parsedId.success) {

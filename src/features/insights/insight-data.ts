@@ -1,4 +1,3 @@
-import { getAccounts } from "@/features/accounts/account-data";
 import type { AccountCurrency } from "@/features/accounts/account.types";
 import { getUserDefaultCurrency } from "@/features/currency/currency-data";
 import { getGoalsDashboardData } from "@/features/goals/goal-data";
@@ -18,6 +17,7 @@ import {
   DEFAULT_PROJECTION_ASSUMPTIONS,
 } from "@/features/projections/projection-engine";
 import { getProjectionPageData } from "@/features/projections/projection-data";
+import { getUserPreferences } from "@/features/settings/user-preferences";
 import {
   getMonthlyTransactionSummary,
   getTransactionCategories,
@@ -29,11 +29,9 @@ import {
   roundCurrencyAmount,
 } from "@/lib/finance/currency-conversion";
 import { getExchangeRateSnapshot } from "@/lib/finance/exchange-rates";
-import { getUserPreferences } from "@/features/settings/user-preferences";
 
 export async function getInsightsDashboardData(): Promise<InsightsDashboardData> {
   const [
-    accounts,
     displayCurrency,
     projectionData,
     goalsData,
@@ -42,7 +40,6 @@ export async function getInsightsDashboardData(): Promise<InsightsDashboardData>
     categories,
     preferences,
   ] = await Promise.all([
-    getAccounts(),
     getUserDefaultCurrency(),
     getProjectionPageData(),
     getGoalsDashboardData(),
@@ -61,6 +58,7 @@ export async function getInsightsDashboardData(): Promise<InsightsDashboardData>
 
     assumptions: {
       ...DEFAULT_PROJECTION_ASSUMPTIONS,
+
       months: 12,
     },
   });
@@ -185,6 +183,7 @@ export async function getInsightsDashboardData(): Promise<InsightsDashboardData>
     outstandingLoanBalance: loanData.totalBalanceInDisplayCurrency,
 
     spendingTrend,
+
     anomalies,
 
     loanOpportunity,
@@ -246,6 +245,7 @@ async function getSpendingAnalysis({
   fxSnapshot,
 }: SpendingAnalysisOptions): Promise<{
   spendingTrend: SpendingTrend | null;
+
   anomalies: ExpenseAnomaly[];
 }> {
   const { supabase, userId } = await requireAuthenticatedUser();
@@ -335,8 +335,11 @@ function calculateSpendingTrend({
 
   const monthKeys = [
     addMonths(currentMonthStart, -4),
+
     addMonths(currentMonthStart, -3),
+
     addMonths(currentMonthStart, -2),
+
     lastCompletedMonth,
   ].map(toMonthKey);
 
@@ -373,6 +376,7 @@ function calculateSpendingTrend({
   const priorAverage =
     priorMonthKeys.reduce(
       (total, key) => total + (monthlyTotals.get(key) ?? 0),
+
       0,
     ) / priorMonthKeys.length;
 

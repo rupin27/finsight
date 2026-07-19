@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { createClient } from "@/lib/supabase/server";
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default async function DashboardLayout({
@@ -23,13 +24,19 @@ export default async function DashboardLayout({
   const email = typeof emailClaim === "string" ? emailClaim : "Account";
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-white">
+    <div className="min-h-dvh bg-[#07090e] text-white">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       <AppSidebar email={email} />
 
-      <main className="min-h-screen lg:pl-72">
-        <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          {children}
-        </div>
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-h-dvh outline-none lg:pl-72"
+      >
+        <div className="page-container">{children}</div>
       </main>
     </div>
   );

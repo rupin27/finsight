@@ -13,17 +13,27 @@ export function FinSightLogo({
 }: FinSightLogoProps) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className="flex size-10 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 shadow-[0_0_32px_rgba(34,211,238,0.12)]">
-        <Landmark className="size-5 text-cyan-300" />
+      <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[0.9rem] border border-cyan-300/20 bg-gradient-to-br from-cyan-300/16 to-cyan-300/[0.055] shadow-[0_12px_36px_rgba(34,211,238,0.09)]">
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/70 to-transparent"
+        />
+
+        <Landmark
+          aria-hidden="true"
+          className="relative size-[19px] text-cyan-200"
+        />
       </div>
 
       {!compact && (
-        <div>
-          <p className="text-base font-semibold tracking-tight text-white">
+        <div className="min-w-0">
+          <p className="truncate text-[1.0625rem] font-semibold tracking-[-0.025em] text-white">
             FinSight
           </p>
 
-          <p className="text-xs text-white/40">Personal finance intelligence</p>
+          <p className="truncate text-[0.6875rem] font-medium tracking-[0.01em] text-white/38">
+            Personal finance intelligence
+          </p>
         </div>
       )}
     </div>

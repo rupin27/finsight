@@ -1,8 +1,8 @@
 import { Bot, BrainCircuit, ShieldCheck } from "lucide-react";
 
 import { DisplayCurrencySelector } from "@/features/currency/components/display-currency-selector";
-import { getInsightsDashboardData } from "@/features/insights/insight-data";
 import { InsightsDashboard } from "@/features/insights/components/insights-dashboard";
+import { getInsightsDashboardData } from "@/features/insights/insight-data";
 
 export default async function InsightsPage() {
   const data = await getInsightsDashboardData();
@@ -12,15 +12,13 @@ export default async function InsightsPage() {
       <header className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-400/[0.05] px-3 py-1.5 text-xs font-medium text-violet-200">
-            <ShieldCheck className="size-3.5" />
+            <ShieldCheck aria-hidden="true" className="size-3.5" />
             Explainable financial intelligence
           </div>
 
-          <h1 className="text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">
-            AI financial coach
-          </h1>
+          <h1 className="page-title">AI financial coach</h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/40 sm:text-base">
+          <p className="page-description">
             Understand your financial health, detect unusual spending, and ask
             questions using your balances, projections, goals, and loan
             scenarios.
@@ -28,16 +26,25 @@ export default async function InsightsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-white/30">
+          <div
+            className={
+              data.aiEnabled
+                ? "flex min-h-10 items-center gap-2 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.045] px-3 text-xs font-medium text-emerald-200/80"
+                : "flex min-h-10 items-center gap-2 rounded-xl border border-amber-400/15 bg-amber-400/[0.045] px-3 text-xs font-medium text-amber-200/80"
+            }
+          >
             {data.aiEnabled ? (
               <>
-                <Bot className="size-4 text-emerald-300" />
-                OpenAI connected
+                <Bot aria-hidden="true" className="size-4 text-emerald-300" />
+                AI coach available
               </>
             ) : (
               <>
-                <BrainCircuit className="size-4 text-amber-300" />
-                Deterministic mode
+                <BrainCircuit
+                  aria-hidden="true"
+                  className="size-4 text-amber-300"
+                />
+                Deterministic insights only
               </>
             )}
           </div>

@@ -1,16 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { LoaderCircle, Pencil, Settings2 } from "lucide-react";
-import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
+
 import { saveLoanProfile } from "@/app/(dashboard)/loans/actions";
-import {
-  INITIAL_LOAN_PROFILE_ACTION_STATE,
-  type LoanProfileActionState,
-} from "@/features/loans/loan-profile-action-state";
-import type { StudentLoanRecord } from "@/features/loans/loan.types";
-import { LoanProfileFormFields } from "@/features/loans/components/loan-profile-form-fields";
+import { FormStatusMessage } from "@/components/forms/form-status-message";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,6 +18,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { LoanProfileFormFields } from "@/features/loans/components/loan-profile-form-fields";
+import {
+  INITIAL_LOAN_PROFILE_ACTION_STATE,
+  type LoanProfileActionState,
+} from "@/features/loans/loan-profile-action-state";
+import type { StudentLoanRecord } from "@/features/loans/loan.types";
 
 interface LoanProfileDialogProps {
   loan: StudentLoanRecord;
@@ -29,41 +32,52 @@ interface LoanProfileDialogProps {
 export function LoanProfileDialog({ loan }: LoanProfileDialogProps) {
   const [open, setOpen] = useState(false);
 
+  const isConfigured = Boolean(loan.profile);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
           <Button
             type="button"
-            variant={loan.profile ? "outline" : "default"}
+            variant={isConfigured ? "outline" : "default"}
+            aria-label={
+              isConfigured
+                ? `Edit repayment details for ${loan.accountName}`
+                : `Configure ${loan.accountName}`
+            }
             className={
-              loan.profile
+              isConfigured
                 ? "border-white/10 bg-transparent text-white/55 hover:bg-white/[0.06] hover:text-white"
                 : "bg-cyan-300 text-slate-950 hover:bg-cyan-200"
             }
           />
         }
       >
-        {loan.profile ? (
+        {isConfigured ? (
           <Pencil className="size-4" />
         ) : (
           <Settings2 className="size-4" />
         )}
 
-        {loan.profile ? "Edit repayment details" : "Configure loan"}
+        {isConfigured ? "Edit repayment details" : "Configure loan"}
       </DialogTrigger>
 
-      <DialogContent className="max-h-[92vh] overflow-y-auto border-white/10 bg-[#0b0f17] text-white sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {loan.profile
+            {isConfigured
               ? "Edit repayment details"
               : "Configure loan optimizer"}
           </DialogTitle>
 
-          <DialogDescription className="text-white/40">
-            Add the lender’s current interest rate, required EMI, and next
-            payment date for {loan.accountName}.
+          <DialogDescription>
+            Add the lender’s current interest rate, required payment, and next
+            payment date for{" "}
+            <span className="font-medium text-white/65">
+              {loan.accountName}
+            </span>
+            .
           </DialogDescription>
         </DialogHeader>
 
@@ -89,6 +103,10 @@ function LoanProfileForm({
 }) {
   const router = useRouter();
 
+  const formId = useId();
+
+  const statusId = `${formId}-status`;
+
   const action = saveLoanProfile.bind(null, loan.accountId);
 
   const [state, formAction] = useActionState<LoanProfileActionState, FormData>(
@@ -98,29 +116,41 @@ function LoanProfileForm({
 
   useEffect(() => {
     if (state.status === "success") {
+      toast.success(state.message ?? "Loan repayment profile saved.");
+
       onSuccess();
       router.refresh();
     }
-  }, [onSuccess, router, state.status]);
+  }, [onSuccess, router, state.message, state.status]);
 
   return (
-    <form action={formAction} className="space-y-6">
-      {state.status === "error" && state.message && (
-        <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
-          {state.message}
-        </div>
-      )}
+    <form
+      action={formAction}
+      className="flex min-h-0 flex-1 flex-col"
+      aria-describedby={state.message ? statusId : undefined}
+    >
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-5">
+        <FormStatusMessage
+          id={statusId}
+          status={state.status}
+          message={state.message}
+        />
 
-      <LoanProfileFormFields loan={loan} fieldErrors={state.fieldErrors} />
+        <LoanProfileFormFields
+          loan={loan}
+          fieldErrors={state.fieldErrors}
+          idPrefix={formId}
+        />
+      </div>
 
       <DialogFooter>
-        <LoanProfileSubmitButton />
+        <LoanProfileSubmitButton isEditing={Boolean(loan.profile)} />
       </DialogFooter>
     </form>
   );
 }
 
-function LoanProfileSubmitButton() {
+function LoanProfileSubmitButton({ isEditing }: { isEditing: boolean }) {
   const { pending } = useFormStatus();
 
   return (
@@ -131,7 +161,11 @@ function LoanProfileSubmitButton() {
     >
       {pending && <LoaderCircle className="size-4 animate-spin" />}
 
-      {pending ? "Saving repayment details..." : "Save repayment details"}
+      {pending
+        ? "Saving repayment details..."
+        : isEditing
+          ? "Save changes"
+          : "Configure loan"}
     </Button>
   );
 }

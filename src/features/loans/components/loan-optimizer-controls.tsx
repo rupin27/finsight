@@ -1,12 +1,13 @@
 "use client";
 
+import { useId } from "react";
 import { RotateCcw, Zap } from "lucide-react";
 
-import type { AccountCurrency } from "@/features/accounts/account.types";
-import type { LoanOptimizerAssumptions } from "@/features/loans/loan.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { AccountCurrency } from "@/features/accounts/account.types";
+import type { LoanOptimizerAssumptions } from "@/features/loans/loan.types";
 import { formatCurrency } from "@/lib/finance/currency";
 
 interface LoanOptimizerControlsProps {
@@ -28,8 +29,17 @@ export function LoanOptimizerControls({
   onChange,
   onReset,
 }: LoanOptimizerControlsProps) {
+  const idPrefix = useId();
+
+  const additionalPaymentId = `${idPrefix}-additional-payment`;
+
+  const oneTimePaymentId = `${idPrefix}-one-time-payment`;
+
+  const scenarioSummaryId = `${idPrefix}-scenario-summary`;
+
   function updateValue(
     field: keyof LoanOptimizerAssumptions,
+
     rawValue: string,
   ) {
     const parsed = Number(rawValue);
@@ -44,21 +54,27 @@ export function LoanOptimizerControls({
   const acceleratedMonthlyPayment =
     requiredMonthlyPayment + assumptions.additionalMonthlyPayment;
 
+  const hasAdjustments =
+    assumptions.additionalMonthlyPayment > 0 || assumptions.oneTimePayment > 0;
+
   return (
-    <section className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <section
+      aria-labelledby={`${idPrefix}-title`}
+      className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5 shadow-[0_18px_55px_rgba(0,0,0,0.12)]"
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Zap className="size-4 text-amber-300" />
+            <Zap aria-hidden="true" className="size-4 text-amber-300" />
 
-            <h2 className="font-medium text-white">
+            <h2 id={`${idPrefix}-title`} className="section-title">
               Accelerated-payoff scenario
             </h2>
           </div>
 
-          <p className="mt-2 text-sm text-white/35">
-            Test extra payments without changing your real account or recorded
-            transactions.
+          <p className="section-description max-w-2xl">
+            Test additional payments without changing your real account,
+            repayment profile, or recorded transactions.
           </p>
         </div>
 
@@ -66,66 +82,90 @@ export function LoanOptimizerControls({
           type="button"
           variant="outline"
           size="sm"
+          disabled={!hasAdjustments}
           onClick={onReset}
-          className="border-white/10 bg-transparent text-white/45 hover:bg-white/[0.06] hover:text-white"
+          className="border-white/10 bg-transparent text-white/50 hover:bg-white/[0.06] hover:text-white"
         >
           <RotateCcw className="size-3.5" />
-          Reset
+          Reset scenario
         </Button>
       </div>
 
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="additionalMonthlyPayment" className="text-white/60">
+          <Label htmlFor={additionalPaymentId}>
             Additional monthly payment ({currency})
           </Label>
 
+          <p
+            id={`${additionalPaymentId}-description`}
+            className="text-xs leading-5 text-white/32"
+          >
+            Added to every future required monthly payment.
+          </p>
+
           <Input
-            id="additionalMonthlyPayment"
+            id={additionalPaymentId}
             type="number"
+            inputMode="decimal"
             min="0"
             step="100"
             value={assumptions.additionalMonthlyPayment}
             onChange={(event) => {
               updateValue("additionalMonthlyPayment", event.target.value);
             }}
-            className="border-white/10 bg-white/[0.04] text-white"
+            aria-describedby={`${additionalPaymentId}-description ${scenarioSummaryId}`}
           />
-
-          <p className="text-xs text-white/25">
-            Added to every future required payment.
-          </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="oneTimePayment" className="text-white/60">
+          <Label htmlFor={oneTimePaymentId}>
             One-time prepayment ({currency})
           </Label>
 
+          <p
+            id={`${oneTimePaymentId}-description`}
+            className="text-xs leading-5 text-white/32"
+          >
+            Applied together with the next scheduled payment.
+          </p>
+
           <Input
-            id="oneTimePayment"
+            id={oneTimePaymentId}
             type="number"
+            inputMode="decimal"
             min="0"
             step="1000"
             value={assumptions.oneTimePayment}
             onChange={(event) => {
               updateValue("oneTimePayment", event.target.value);
             }}
-            className="border-white/10 bg-white/[0.04] text-white"
+            aria-describedby={`${oneTimePaymentId}-description ${scenarioSummaryId}`}
           />
-
-          <p className="text-xs text-white/25">
-            Applied with the next scheduled payment.
-          </p>
         </div>
       </div>
 
-      <div className="mt-5 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.04] px-4 py-3">
-        <p className="text-xs text-white/30">Scenario monthly payment</p>
+      <div
+        id={scenarioSummaryId}
+        role="status"
+        aria-live="polite"
+        className="mt-5 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.04] px-4 py-3"
+      >
+        <p className="text-xs font-medium text-white/32">
+          Scenario monthly payment
+        </p>
 
-        <p className="mt-1 font-medium text-cyan-200">
+        <p className="financial-number mt-1 text-base font-semibold text-cyan-200">
           {formatCurrency(acceleratedMonthlyPayment, currency)}
         </p>
+
+        {assumptions.oneTimePayment > 0 && (
+          <p className="financial-number mt-1 text-xs text-white/35">
+            Plus a one-time payment of{" "}
+            {formatCurrency(assumptions.oneTimePayment, currency)} on the next
+            payment date.
+          </p>
+        )}
       </div>
     </section>
   );

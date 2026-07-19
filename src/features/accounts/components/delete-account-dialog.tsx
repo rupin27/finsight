@@ -1,9 +1,9 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { useFormStatus } from "react-dom";
+import { AlertTriangle, LoaderCircle, Trash2 } from "lucide-react";
 
 import { deleteAccount } from "@/app/(dashboard)/accounts/actions";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -11,9 +11,11 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface DeleteAccountDialogProps {
   accountId: string;
@@ -33,7 +35,9 @@ export function DeleteAccountDialog({
           <Button
             type="button"
             variant="ghost"
-            className="h-9 px-3 text-red-300/55 hover:bg-red-400/10 hover:text-red-200"
+            size="sm"
+            aria-label={`Delete ${accountName}`}
+            className="text-red-300/60 hover:bg-red-400/10 hover:text-red-200"
           />
         }
       >
@@ -41,11 +45,15 @@ export function DeleteAccountDialog({
         Delete
       </AlertDialogTrigger>
 
-      <AlertDialogContent className="border-white/10 bg-[#0b0f17] text-white">
+      <AlertDialogContent>
         <AlertDialogHeader>
+          <AlertDialogMedia>
+            <AlertTriangle className="size-5" />
+          </AlertDialogMedia>
+
           <AlertDialogTitle>Delete {accountName}?</AlertDialogTitle>
 
-          <AlertDialogDescription className="text-white/40">
+          <AlertDialogDescription>
             This permanently removes the account. An account containing
             transactions cannot be deleted and should be deactivated instead.
           </AlertDialogDescription>
@@ -54,13 +62,27 @@ export function DeleteAccountDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-          <form action={deleteAccountWithId}>
-            <Button type="submit" variant="destructive">
-              Delete account
-            </Button>
+          <form action={deleteAccountWithId} className="contents">
+            <DeleteAccountButton />
           </form>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function DeleteAccountButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" variant="destructive" disabled={pending}>
+      {pending ? (
+        <LoaderCircle className="size-4 animate-spin" />
+      ) : (
+        <Trash2 className="size-4" />
+      )}
+
+      {pending ? "Deleting account..." : "Delete account"}
+    </Button>
   );
 }

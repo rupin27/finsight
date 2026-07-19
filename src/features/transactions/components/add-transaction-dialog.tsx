@@ -1,18 +1,12 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 import { createTransaction } from "@/app/(dashboard)/transactions/actions";
-import type { Account } from "@/features/accounts/account.types";
-import {
-  INITIAL_TRANSACTION_ACTION_STATE,
-  type TransactionActionState,
-} from "@/features/transactions/transaction-action-state";
-import type { TransactionCategory } from "@/features/transactions/transaction.types";
-import { TransactionFormFields } from "@/features/transactions/components/transaction-form-fields";
-import { TransactionSubmitButton } from "@/features/transactions/components/transaction-submit-button";
+import { FormStatusMessage } from "@/components/forms/form-status-message";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +17,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { Account } from "@/features/accounts/account.types";
+import { TransactionFormFields } from "@/features/transactions/components/transaction-form-fields";
+import { TransactionSubmitButton } from "@/features/transactions/components/transaction-submit-button";
+import {
+  INITIAL_TRANSACTION_ACTION_STATE,
+  type TransactionActionState,
+} from "@/features/transactions/transaction-action-state";
+import type { TransactionCategory } from "@/features/transactions/transaction.types";
 
 interface AddTransactionDialogProps {
   accounts: Account[];
@@ -46,6 +48,9 @@ export function AddTransactionDialog({
           <Button
             type="button"
             disabled={!canCreate}
+            aria-describedby={
+              !canCreate ? "add-transaction-disabled-reason" : undefined
+            }
             className="bg-cyan-300 text-slate-950 hover:bg-cyan-200"
           />
         }
@@ -54,11 +59,17 @@ export function AddTransactionDialog({
         Add transaction
       </DialogTrigger>
 
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-white/10 bg-[#0b0f17] text-white sm:max-w-2xl">
+      {!canCreate && (
+        <span id="add-transaction-disabled-reason" className="sr-only">
+          Create an active non-loan account before adding a transaction.
+        </span>
+      )}
+
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Add transaction</DialogTitle>
 
-          <DialogDescription className="text-white/40">
+          <DialogDescription>
             Record income, an expense, or a student-loan payment.
           </DialogDescription>
         </DialogHeader>
@@ -79,7 +90,9 @@ export function AddTransactionDialog({
 
 interface AddTransactionFormProps {
   accounts: Account[];
+
   categories: TransactionCategory[];
+
   onSuccess: () => void;
 }
 
@@ -97,24 +110,32 @@ function AddTransactionForm({
 
   useEffect(() => {
     if (state.status === "success") {
+      toast.success("Transaction created");
+
       onSuccess();
       router.refresh();
     }
   }, [onSuccess, router, state.status]);
 
   return (
-    <form action={formAction} className="space-y-6">
-      {state.status === "error" && state.message && (
-        <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
-          {state.message}
-        </div>
-      )}
+    <form
+      action={formAction}
+      className="flex min-h-0 flex-1 flex-col"
+      aria-describedby={state.message ? "add-transaction-status" : undefined}
+    >
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-5">
+        <FormStatusMessage
+          id="add-transaction-status"
+          status={state.status}
+          message={state.message}
+        />
 
-      <TransactionFormFields
-        accounts={accounts}
-        categories={categories}
-        fieldErrors={state.fieldErrors}
-      />
+        <TransactionFormFields
+          accounts={accounts}
+          categories={categories}
+          fieldErrors={state.fieldErrors}
+        />
+      </div>
 
       <DialogFooter>
         <TransactionSubmitButton

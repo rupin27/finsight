@@ -3,15 +3,10 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 import { updateAccount } from "@/app/(dashboard)/accounts/actions";
-import {
-  INITIAL_ACCOUNT_ACTION_STATE,
-  type AccountActionState,
-} from "@/features/accounts/account-action-state";
-import type { Account } from "@/features/accounts/account.types";
-import { AccountFormFields } from "@/features/accounts/components/account-form-fields";
-import { AccountSubmitButton } from "@/features/accounts/components/account-submit-button";
+import { FormStatusMessage } from "@/components/forms/form-status-message";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +17,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  INITIAL_ACCOUNT_ACTION_STATE,
+  type AccountActionState,
+} from "@/features/accounts/account-action-state";
+import { AccountFormFields } from "@/features/accounts/components/account-form-fields";
+import { AccountSubmitButton } from "@/features/accounts/components/account-submit-button";
+import type { Account } from "@/features/accounts/account.types";
 
 interface EditAccountDialogProps {
   account: Account;
@@ -37,7 +39,9 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
           <Button
             type="button"
             variant="ghost"
-            className="h-9 px-3 text-white/45 hover:bg-white/[0.06] hover:text-white"
+            size="sm"
+            aria-label={`Edit ${account.name}`}
+            className="text-white/45 hover:bg-white/[0.06] hover:text-white"
           />
         }
       >
@@ -45,11 +49,11 @@ export function EditAccountDialog({ account }: EditAccountDialogProps) {
         Edit
       </DialogTrigger>
 
-      <DialogContent className="border-white/10 bg-[#0b0f17] text-white sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit account</DialogTitle>
 
-          <DialogDescription className="text-white/40">
+          <DialogDescription>
             Update the account’s institution, currency, type, or starting
             balance.
           </DialogDescription>
@@ -85,23 +89,31 @@ function EditAccountForm({ account, onSuccess }: EditAccountFormProps) {
 
   useEffect(() => {
     if (state.status === "success") {
+      toast.success("Account updated");
+
       onSuccess();
       router.refresh();
     }
   }, [onSuccess, router, state.status]);
 
   return (
-    <form action={formAction} className="space-y-6">
-      {state.status === "error" && state.message && (
-        <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-200">
-          {state.message}
-        </div>
-      )}
+    <form
+      action={formAction}
+      className="flex min-h-0 flex-1 flex-col"
+      aria-describedby={state.message ? "edit-account-status" : undefined}
+    >
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-5">
+        <FormStatusMessage
+          id="edit-account-status"
+          status={state.status}
+          message={state.message}
+        />
 
-      <AccountFormFields
-        defaultValues={account}
-        fieldErrors={state.fieldErrors}
-      />
+        <AccountFormFields
+          defaultValues={account}
+          fieldErrors={state.fieldErrors}
+        />
+      </div>
 
       <DialogFooter>
         <AccountSubmitButton

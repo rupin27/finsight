@@ -1,8 +1,8 @@
 import { ChartNoAxesCombined, ShieldCheck } from "lucide-react";
 
-import { getProjectionPageData } from "@/features/projections/projection-data";
-import { ProjectionDashboard } from "@/features/projections/components/projection-dashboard";
 import { DisplayCurrencySelector } from "@/features/currency/components/display-currency-selector";
+import { ProjectionDashboard } from "@/features/projections/components/projection-dashboard";
+import { getProjectionPageData } from "@/features/projections/projection-data";
 
 export default async function ProjectionsPage() {
   const data = await getProjectionPageData();
@@ -12,23 +12,24 @@ export default async function ProjectionsPage() {
       <header className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/[0.05] px-3 py-1.5 text-xs font-medium text-cyan-200">
-            <ShieldCheck className="size-3.5" />
+            <ShieldCheck aria-hidden="true" className="size-3.5" />
             Deterministic forecast
           </div>
 
-          <h1 className="text-3xl font-semibold tracking-[-0.035em] text-white sm:text-4xl">
-            Savings projections
-          </h1>
+          <h1 className="page-title">Savings projections</h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/40 sm:text-base">
+          <p className="page-description">
             Forecast your future cash balance using recurring income, expenses,
             loan payments, and adjustable what-if assumptions.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-white/30">
-            <ChartNoAxesCombined className="size-4 text-violet-300" />
+          <div className="flex min-h-10 items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 text-xs font-medium text-white/38">
+            <ChartNoAxesCombined
+              aria-hidden="true"
+              className="size-4 text-violet-300"
+            />
             Up to 24 months
           </div>
 
